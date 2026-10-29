@@ -1,0 +1,40 @@
+class ChatgptWrapper < Formula
+  desc "Build and maintain an isolated personal copy of the macOS ChatGPT app"
+  homepage "https://github.com/forkunsafe/chatgpt-wrapper"
+  url "https://github.com/forkunsafe/chatgpt-wrapper/releases/download/v@VERSION@/chatgpt-wrapper-@VERSION@.tar.gz"
+  sha256 "@SHA256@"
+  license :cannot_represent
+
+  depends_on arch: :arm64
+  depends_on "go"
+  depends_on :macos
+
+  def install
+    libexec.install "bin", "lib", "launcher", "assets", "VERSION"
+    libexec.install Dir["*.sh"]
+    bin.install_symlink libexec/"bin/chatgpt-personal"
+  end
+
+  def caveats
+    <<~EOS
+      License: Apache License 2.0 with Commons Clause 1.0 (source-available).
+      Install the official ChatGPT app at /Applications/ChatGPT.app first.
+      Quit Personal, then create your copy: chatgpt-personal install
+      Launch: chatgpt-personal open
+      Rebuild after official app updates: chatgpt-personal update
+      Homebrew upgrades only tooling; they never rebuild or stop your app.
+      Homebrew uninstall preserves the Personal app and all account data.
+      To remove the app first: chatgpt-personal uninstall
+      Optional hourly checks: chatgpt-personal autoupdate install
+    EOS
+  end
+
+  test do
+    assert_match "chatgpt-personal #{version}", shell_output("#{bin}/chatgpt-personal --version")
+    assert_match "autoupdate install", shell_output("#{bin}/chatgpt-personal --help")
+    assert_path_exists libexec/"lib/build.sh"
+    assert_path_exists libexec/"launcher/main.go"
+    refute_path_exists testpath/".codex-personal"
+    refute_path_exists testpath/"Applications/ChatGPT Personal.app"
+  end
+end

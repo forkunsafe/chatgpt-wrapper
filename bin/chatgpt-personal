@@ -1,0 +1,47 @@
+#!/bin/bash
+set -euo pipefail
+# Follow Homebrew's bin symlink, including relative symlinks.
+entry=${BASH_SOURCE[0]}
+COMMAND_PATH="$(cd "$(dirname "$entry")" && pwd)/$(basename "$entry")"
+while [[ -L "$entry" ]]; do
+ directory=$(cd -P "$(dirname "$entry")" && pwd)
+ entry=$(readlink "$entry")
+ [[ "$entry" == /* ]] || entry="$directory/$entry"
+done
+ROOT=$(cd -P "$(dirname "$entry")/.." && pwd)
+usage() {
+ cat <<'HELP'
+Usage: chatgpt-personal <command>
+  install [--build-only]   Build Personal from /Applications/ChatGPT.app
+  update [--force]         Rebuild when the official app or build policy changes
+  verify                  Check the installed app and running profile isolation
+  open                    Launch ~/Applications/ChatGPT Personal.app
+  uninstall               Move Personal to Trash; preserve all account data
+  autoupdate install      Enable hourly checks for this user
+  autoupdate uninstall    Disable hourly checks
+  --version               Show wrapper tooling version
+Homebrew installs tooling only. Run 'chatgpt-personal install' to create the app.
+HELP
+}
+command=${1:---help}
+[[ $# == 0 ]] || shift
+case "$command" in
+ --help|-h|help) [[ $# == 0 ]] || exit 2; usage ;;
+ --version) [[ $# == 0 ]] || exit 2; printf 'chatgpt-personal %s\n' "$(cat "$ROOT/VERSION")" ;;
+ install|update|verify|uninstall) exec "$ROOT/$command.sh" "$@" ;;
+ open)
+  [[ $# == 0 ]] || { usage >&2; exit 2; }
+  app="$HOME/Applications/ChatGPT Personal.app"
+  [[ -d "$app" ]] || { echo "Personal is not installed. Run: chatgpt-personal install" >&2; exit 1; }
+  exec /usr/bin/open "$app"
+  ;;
+ autoupdate)
+  [[ $# == 1 ]] || { usage >&2; exit 2; }
+  case "$1" in
+   install) export PERSONAL_UPDATE_COMMAND="$COMMAND_PATH"; exec "$ROOT/install-autoupdate.sh" ;;
+   uninstall) exec "$ROOT/uninstall-autoupdate.sh" ;;
+   *) usage >&2; exit 2 ;;
+  esac
+  ;;
+ *) usage >&2; exit 2 ;;
+esac
