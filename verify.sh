@@ -15,7 +15,7 @@ real=$(get "$APP" PersonalOriginalExecutable)
 [[ -n $(get "$APP" PersonalSourceBundleVersion) && -n $(get "$APP" PersonalSourceShortVersionString) && -n $(get "$APP" PersonalSourceInfoSHA256) ]] || fail 'Source metadata missing'
 # A valid seal does not imply AMFI will permit ad-hoc restricted entitlements.
 main_entitlements=$(codesign -d --entitlements :- "$APP/Contents/MacOS/$real" 2>/dev/null)
-for key in com.apple.application-identifier com.apple.developer.team-identifier com.apple.developer.aps-environment com.apple.developer.usernotifications.communication keychain-access-groups; do
+for key in com.apple.application-identifier com.apple.developer.team-identifier com.apple.developer.aps-environment com.apple.developer.associated-domains com.apple.developer.usernotifications.communication keychain-access-groups; do
  if printf '%s' "$main_entitlements" | /usr/bin/grep -Fq "<key>$key</key>"; then
   fail "Restricted main entitlement $key prevents ad-hoc launch. Quit Personal and run ./update.sh --force."
  fi

@@ -5,7 +5,7 @@ SOURCE=/Applications/ChatGPT.app
 APP="$HOME/Applications/ChatGPT Personal.app"
 PROFILE="$HOME/Library/Application Support/ChatGPT-Personal"
 CODEX="$HOME/.codex-personal"
-BUILD_SCHEMA=3
+BUILD_SCHEMA=4
 PB=/usr/libexec/PlistBuddy
 LSREGISTER=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister
 fail() { echo "Error: $*" >&2; exit 1; }

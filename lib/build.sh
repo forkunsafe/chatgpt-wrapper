@@ -112,7 +112,7 @@ phase "Sign the launcher and main executable; keep nested official signatures"
 # The Go trampoline needs no entitlements. Apple's restricted developer/keychain/push
 # entitlements cannot be validated for an ad-hoc main executable (AMFI rejects it).
 ditto "$STAGE/main-entitlements.plist" "$STAGE/real-entitlements.plist"
-for key in com.apple.application-identifier com.apple.developer.team-identifier com.apple.developer.aps-environment com.apple.developer.usernotifications.communication keychain-access-groups; do
+for key in com.apple.application-identifier com.apple.developer.team-identifier com.apple.developer.aps-environment com.apple.developer.associated-domains com.apple.developer.usernotifications.communication keychain-access-groups; do
  "$PB" -c "Delete :$key" "$STAGE/real-entitlements.plist" 2>/dev/null || true
 done
 setkey "$NEW" PersonalEntitlementPolicy 'ad-hoc-compatible-main; original nested signatures preserved'
